@@ -1,54 +1,93 @@
 {% extends 'basic.html' %}
 {% block content %}
-<div class="container">
-    <div class="row">
-        <!-- 좌측 영역 - 사용자(의사) 정보 -->
-        <div class="col-md-3">
-            <div class="user-info">
-                <!-- 사용자 정보를 여기에 표시 -->
-            </div>
-        </div>
-
-        <!-- 우측 영역 - 환자 목록 -->
-        <div class="col-md-9">
-            <div class="scrollable-list">
-                <div class="table-container">
-                    {% if patient_list %}
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Patient ID</th>
-                                <th>Last Name</th>
-                                <th>First Name</th>
-                                <th>Birth Date</th>
-                                <th>Address</th>
-                                <th>Gender</th>
-                                <th>Phone Number</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for patient in patient_list %}
-                            <tr>
-                                <td><a href="{% url 'base:detail' patient.id %}">{{ patient.id }}</a></td>
-                                <td>{{ patient.last_name }}</td>
-                                <td>{{ patient.first_name }}</td>
-                                <td>{{ patient.birth_date|date:"Ymd" }}</td>
-                                <td>{{ patient.address }}</td>
-                                <td>{{ patient.get_gender_display }}</td>
-                                <td>{{ patient.phone_num }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    <p>환자가 없습니다.</p>
-                    {% endif %}
+    <div class="container">
+        <div class="row">
+            <!-- 좌측 영역 - 사용자(의사) 정보 -->
+            <div class="col-md-3">
+                <div class="user-info">
+                    <!-- 사용자 정보를 여기에 표시 -->
                 </div>
             </div>
+
+            <!-- 우측 영역 - 환자 목록 -->
+            <div class="row">
+                <!-- 우측 영역 - 환자 목록 -->
+                <div class="col-md-6">
+                    <div class="scrollable-list">
+                        <div class="table-container table-responsive">
+                            {% if patient_list %}
+                                <table class="table table-bordered table-hover table-sm"> <!-- table-sm 클래스 추가 -->
+                                    <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Name</th>
+                                        <th>Birth Date</th>
+                                        <th>Address</th>
+                                        <th>Gender</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for patient in patient_list %}
+                                        <tr>
+                                            <td><a href="#" class="patient-detail-link" data-patient-id="{{ patient.id }}">{{ patient.id }}</a></td>
+                                            <td>{{ patient.last_name }} {{ patient.first_name }}</td>
+                                            <td>{{ patient.birth_date|date:"Ymd" }}</td>
+                                            <td>{{ patient.address }}</td>
+                                            <td>{{ patient.get_gender_display }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <p>환자가 없습니다.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <!-- 롤 다운을 위한 스타일 -->
+                <style>
+                    .scrollable-list {
+                        max-height: 400px; /* 변경 가능한 높이 설정 */
+                        overflow-y: auto;
+                    }
+
+                </style>
+            </div>
         </div>
+    </div>
+    <div class="col-md-3" id="patient-detail">
+        <!-- 환자 정보가 나타날 곳 -->
+        <script>
+            // 환자 상세 정보를 가져오는 함수
+            function getPatientDetail(patientId) {
+                fetch(`/rest/patients/${patientId}/`)  // 적절한 API 엔드포인트로 변경
+                    .then(response => response.json())
+                    .then(data => {
+                        // 받아온 데이터를 화면에 표시
+                        const patientDetailDiv = document.getElementById("patient-detail");
+                        patientDetailDiv.innerHTML = `
+                    <h3>Patient ID: ${data.patient_id}</h3>
+                    <p>Name: ${data.first_name} ${data.last_name}</p>
+                    <!-- 추가 필드들 표시... -->
+                `;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // 각 환자 ID에 대한 클릭 이벤트 리스너 추가
+            const patientLinks = document.querySelectorAll(".patient-detail-link");
+            patientLinks.forEach(link => {
+                link.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const patientId = this.getAttribute("data-patient-id");
+                    getPatientDetail(patientId);
+                });
+            });
+        </script>
+    </div>
 
     </div>
     <a href="{% url 'base:create_patient' %}" class="btn btn-primary">환자 등록하기</a>
-</div>
+    </div>
 {% endblock %}
 
