@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from .models import Patient
 from .forms import PatientForm
+from rest_framework.views import APIView
+from patient_info_API.views import PatientListAPIView
 
 def index(request):
     patient_list = Patient.objects.order_by('last_name', 'first_name')
