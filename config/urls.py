@@ -22,4 +22,5 @@ urlpatterns = [
     path('base/', include('base.urls')),
     path('common/', include('common.urls')),
     path('',views.index, name='index'),
+    path('rest/', include('patient_info_API.urls')),
 ]
